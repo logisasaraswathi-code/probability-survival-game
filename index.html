@@ -1,74 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Probability Survival Game</title>
+<title>Iceland Survival Game</title>
 
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #4facfe, #00f2fe);
-    color: white;
+    font-family: Arial;
     text-align: center;
+    color: white;
+    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');
+    background-size: cover;
+    background-position: center;
 }
 
 .container {
+    background: rgba(0,0,0,0.6);
+    min-height: 100vh;
     padding: 20px;
 }
 
-h1 {
-    margin-top: 10px;
-}
-
-.stats {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 20px 0;
-    flex-wrap: wrap;
-}
-
-.stat {
-    background: rgba(0,0,0,0.3);
+button {
     padding: 10px 20px;
-    border-radius: 10px;
-}
-
-.actions button {
-    padding: 10px 15px;
-    margin: 10px;
+    margin: 8px;
+    font-size: 15px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-    background: #ffcc00;
 }
 
-.actions button:hover {
-    transform: scale(1.1);
+.hidden {
+    display: none;
+}
+
+.box {
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    margin: 10px auto;
+    width: 80%;
+    border-radius: 10px;
 }
 
 .log {
-    margin-top: 20px;
     max-height: 200px;
     overflow-y: auto;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.5);
     padding: 10px;
-    border-radius: 10px;
-}
-
-.weather {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.game-over {
-    font-size: 22px;
-    color: red;
     margin-top: 15px;
+    border-radius: 10px;
 }
 </style>
 </head>
@@ -76,187 +55,153 @@ h1 {
 <body>
 
 <div class="container">
-    <h1>🏝 Probability Survival Game</h1>
 
-    <div class="stats">
-        <div class="stat">❤️ Health: <span id="health"></span></div>
-        <div class="stat">⚡ Energy: <span id="energy"></span></div>
-        <div class="stat">🍗 Food: <span id="food"></span></div>
-        <div class="stat">📅 Day: <span id="day"></span></div>
+<div id="welcome">
+    <h1>❄ Iceland Survival Game</h1>
+    <h2>Are you ready to survive in Iceland?</h2>
+    <button onclick="startGame()">Yes, Start</button>
+</div>
+
+<div id="game" class="hidden">
+
+    <h2>Your Status</h2>
+    <div class="box">
+        ❤️ Health: <span id="health"></span><br>
+        ⚡ Energy: <span id="energy"></span><br>
+        🍞 Food: <span id="food"></span><br>
+        📅 Day: <span id="day"></span>
     </div>
 
-    <div class="weather">Weather: <span id="weatherStatus"></span></div>
-
-    <div class="actions">
-        <button onclick="takeAction('hunt')">Hunt</button>
-        <button onclick="takeAction('forage')">Forage</button>
-        <button onclick="takeAction('explore')">Explore</button>
-        <button onclick="takeAction('rest')">Rest</button>
+    <div class="box">
+        🌤 Weather Today: <span id="weather"></span>
     </div>
 
-    <div class="game-over" id="gameOverMessage"></div>
-    <button onclick="restartGame()">Restart</button>
+    <h3>What will you do?</h3>
+
+    <button onclick="action('food')">Collect Food</button>
+    <button onclick="action('water')">Collect Water</button>
+    <button onclick="action('rest')">Stay Inside & Rest</button>
+    <button onclick="action('fire')">Make Fire</button>
 
     <div class="log" id="log"></div>
+
+</div>
+
 </div>
 
 <script>
-// Game Variables
+
 let health, energy, food, day;
-let storm = false;
-let skipTurn = false;
+let weather;
 let gameOver = false;
 
-// Initialize Game
-function initGame() {
+function startGame() {
+    document.getElementById("welcome").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+
     health = 100;
     energy = 100;
     food = 3;
     day = 1;
-    storm = false;
-    skipTurn = false;
     gameOver = false;
-    document.getElementById("gameOverMessage").innerText = "";
-    document.getElementById("log").innerHTML = "";
-    generateWeather();
-    updateUI();
-    logMessage("Game Started! Survive as long as possible.");
+
+    nextWeather();
+    update();
+    log("Game started. Choose wisely according to weather.");
 }
 
-// Update UI
-function updateUI() {
+function update() {
     document.getElementById("health").innerText = health;
     document.getElementById("energy").innerText = energy;
     document.getElementById("food").innerText = food;
     document.getElementById("day").innerText = day;
-    document.getElementById("weatherStatus").innerText = storm ? "🌧 Storm" : "☀ Clear";
+    document.getElementById("weather").innerText = weather;
 }
 
-// Log Messages
-function logMessage(message) {
-    const log = document.getElementById("log");
-    log.innerHTML = "<div>" + message + "</div>" + log.innerHTML;
+function nextWeather() {
+    let r = Math.random();
+
+    if (r < 0.25) weather = "☀ Full Sun";
+    else if (r < 0.5) weather = "🌧 Rain";
+    else if (r < 0.75) weather = "🌪 Storm";
+    else weather = "❄ Snow";
 }
 
-// Weather System
-function generateWeather() {
-    storm = Math.random() < 0.3; // 30% chance
+function log(message) {
+    document.getElementById("log").innerHTML =
+        "<div>" + message + "</div>" +
+        document.getElementById("log").innerHTML;
 }
 
-// Player Action
-function takeAction(action) {
+function action(choice) {
+
     if (gameOver) return;
 
-    if (skipTurn) {
-        logMessage("⚡ You were exhausted and skipped the day.");
-        skipTurn = false;
-        nextDay();
-        return;
-    }
-
-    let success;
-
-    if (action === "hunt") {
-        let rate = storm ? 0.2 : 0.4;
-        success = Math.random() < rate;
-        if (success) {
-            food += 3;
-            logMessage("🦌 Hunt Success! +3 Food");
-        } else {
-            energy -= 20;
-            logMessage("❌ Hunt Failed! -20 Energy");
-        }
-    }
-
-    if (action === "forage") {
-        success = Math.random() < 0.7;
-        if (success) {
-            food += 1;
-            logMessage("🍓 Forage Success! +1 Food");
+    if (weather === "☀ Full Sun") {
+        if (choice === "food") {
+            food += 2;
+            log("Good choice! Sun helps you find food. +2 Food");
+        } else if (choice === "rest") {
+            energy += 20;
+            log("Resting in sunlight gives energy. +20 Energy");
         } else {
             energy -= 10;
-            logMessage("❌ Forage Failed! -10 Energy");
+            log("Not the best choice for sunny weather. -10 Energy");
         }
     }
 
-    if (action === "explore") {
-        if (storm) {
-            logMessage("🚫 Cannot explore during storm.");
-            return;
-        }
-        success = Math.random() < 0.2;
-        if (success) {
-            food += 5;
-            logMessage("🗺 Explore Success! +5 Food");
+    else if (weather === "🌧 Rain") {
+        if (choice === "water") {
+            energy += 15;
+            log("Rain helped you collect water. +15 Energy");
         } else {
-            health -= 30;
-            logMessage("❌ Explore Failed! -30 Health");
+            energy -= 15;
+            log("Rain made things harder. -15 Energy");
         }
     }
 
-    if (action === "rest") {
-        energy += 25;
-        logMessage("😴 Rested! +25 Energy");
+    else if (weather === "🌪 Storm") {
+        if (choice === "rest") {
+            energy += 10;
+            log("Smart move! You stayed safe during storm.");
+        } else {
+            health -= 20;
+            log("Storm hurt you! -20 Health");
+        }
     }
 
-    nextDay();
-}
-
-// Random Events
-function randomEvents() {
-    if (Math.random() < 0.1) {
-        health -= 20;
-        logMessage("🤒 You got sick! -20 Health");
+    else if (weather === "❄ Snow") {
+        if (choice === "fire") {
+            energy += 15;
+            log("Fire kept you warm. +15 Energy");
+        } else {
+            health -= 15;
+            log("Cold snow hurt you. -15 Health");
+        }
     }
-    if (Math.random() < 0.15) {
-        energy += 15;
-        logMessage("💧 Found fresh water! +15 Energy");
-    }
-}
 
-// Next Day Logic
-function nextDay() {
+    // Daily food use
     if (food > 0) {
         food -= 1;
     } else {
-        health -= 15;
-        logMessage("⚠ No Food! -15 Health");
+        health -= 10;
+        log("No food! -10 Health");
     }
-
-    if (energy <= 0) {
-        energy = 0;
-        skipTurn = true;
-        logMessage("⚡ Energy depleted! Next day skipped.");
-    }
-
-    randomEvents();
 
     if (health <= 0) {
         health = 0;
-        endGame();
+        gameOver = true;
+        log("Game Over! You survived " + day + " days.");
+        update();
         return;
     }
 
     day++;
-    generateWeather();
-    updateUI();
+    nextWeather();
+    update();
 }
 
-// Game Over
-function endGame() {
-    gameOver = true;
-    document.getElementById("gameOverMessage").innerText =
-        "💀 Game Over! You survived " + day + " days.";
-}
-
-// Restart
-function restartGame() {
-    initGame();
-}
-
-// Start game
-initGame();
 </script>
 
 </body>
-  </html>
+</html>
