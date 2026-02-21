@@ -1,207 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Iceland Survival Game</title>
-
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-    text-align: center;
-    color: white;
-    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e');
-    background-size: cover;
-    background-position: center;
-}
-
-.container {
-    background: rgba(0,0,0,0.6);
-    min-height: 100vh;
-    padding: 20px;
-}
-
-button {
-    padding: 10px 20px;
-    margin: 8px;
-    font-size: 15px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.hidden {
-    display: none;
-}
-
-.box {
-    background: rgba(255,255,255,0.2);
-    padding: 15px;
-    margin: 10px auto;
-    width: 80%;
-    border-radius: 10px;
-}
-
-.log {
-    max-height: 200px;
-    overflow-y: auto;
-    background: rgba(0,0,0,0.5);
-    padding: 10px;
-    margin-top: 15px;
-    border-radius: 10px;
-}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Probability Survival Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+
+<h1>🌨 Probability Survival Simulator</h1>
 
 <div class="container">
 
-<div id="welcome">
-    <h1>❄ Iceland Survival Game</h1>
-    <h2>Are you ready to survive in Iceland?</h2>
-    <button onclick="startGame()">Yes, Start</button>
-</div>
+  <!-- STATS -->
+  <div class="panel">
+    <h2>📊 Stats</h2>
 
-<div id="game" class="hidden">
-
-    <h2>Your Status</h2>
-    <div class="box">
-        ❤️ Health: <span id="health"></span><br>
-        ⚡ Energy: <span id="energy"></span><br>
-        🍞 Food: <span id="food"></span><br>
-        📅 Day: <span id="day"></span>
+    <div class="stat">
+      Health
+      <div class="bar"><div id="healthBar"></div></div>
     </div>
 
-    <div class="box">
-        🌤 Weather Today: <span id="weather"></span>
+    <div class="stat">
+      Energy
+      <div class="bar"><div id="energyBar"></div></div>
     </div>
 
-    <h3>What will you do?</h3>
+    <div class="stat">
+      Hunger
+      <div class="bar"><div id="hungerBar"></div></div>
+    </div>
 
-    <button onclick="action('food')">Collect Food</button>
-    <button onclick="action('water')">Collect Water</button>
-    <button onclick="action('rest')">Stay Inside & Rest</button>
-    <button onclick="action('fire')">Make Fire</button>
+    <div class="stat">
+      Thirst
+      <div class="bar"><div id="thirstBar"></div></div>
+    </div>
 
-    <div class="log" id="log"></div>
+    <div class="stat">
+      Temperature
+      <div class="bar"><div id="tempBar"></div></div>
+    </div>
+
+    <div class="stat">
+      Morale
+      <div class="bar"><div id="moraleBar"></div></div>
+    </div>
+
+    <p>Day: <span id="day"></span></p>
+    <p>Weather: <span id="weather"></span></p>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="panel">
+    <h2>⚔ Actions</h2>
+    <button onclick="performAction('forage')">Forage Food</button>
+    <button onclick="performAction('hunt')">Hunt</button>
+    <button onclick="performAction('rest')">Rest</button>
+    <button onclick="performAction('makeFire')">Make Fire</button>
+    <button onclick="nextDay()">Next Day</button>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="panel">
+    <h2>🎒 Inventory</h2>
+    <div id="inventory"></div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="panel">
+    <h2>📈 Skills</h2>
+    <p>Foraging: <span id="forageSkill"></span></p>
+    <p>Hunting: <span id="huntSkill"></span></p>
+    <p>Survival: <span id="survivalSkill"></span></p>
+  </div>
 
 </div>
 
+<!-- EVENT LOG -->
+<div class="panel full">
+  <h2>📜 Event Log</h2>
+  <div id="log"></div>
 </div>
 
-<script>
+<!-- GAME OVER -->
+<div id="gameOver" class="gameOver hidden">
+  <h2>💀 Game Over</h2>
+  <p id="summary"></p>
+  <button onclick="resetGame()">Restart</button>
+</div>
 
-let health, energy, food, day;
-let weather;
-let gameOver = false;
-
-function startGame() {
-    document.getElementById("welcome").classList.add("hidden");
-    document.getElementById("game").classList.remove("hidden");
-
-    health = 100;
-    energy = 100;
-    food = 3;
-    day = 1;
-    gameOver = false;
-
-    nextWeather();
-    update();
-    log("Game started. Choose wisely according to weather.");
-}
-
-function update() {
-    document.getElementById("health").innerText = health;
-    document.getElementById("energy").innerText = energy;
-    document.getElementById("food").innerText = food;
-    document.getElementById("day").innerText = day;
-    document.getElementById("weather").innerText = weather;
-}
-
-function nextWeather() {
-    let r = Math.random();
-
-    if (r < 0.25) weather = "☀ Full Sun";
-    else if (r < 0.5) weather = "🌧 Rain";
-    else if (r < 0.75) weather = "🌪 Storm";
-    else weather = "❄ Snow";
-}
-
-function log(message) {
-    document.getElementById("log").innerHTML =
-        "<div>" + message + "</div>" +
-        document.getElementById("log").innerHTML;
-}
-
-function action(choice) {
-
-    if (gameOver) return;
-
-    if (weather === "☀ Full Sun") {
-        if (choice === "food") {
-            food += 2;
-            log("Good choice! Sun helps you find food. +2 Food");
-        } else if (choice === "rest") {
-            energy += 20;
-            log("Resting in sunlight gives energy. +20 Energy");
-        } else {
-            energy -= 10;
-            log("Not the best choice for sunny weather. -10 Energy");
-        }
-    }
-
-    else if (weather === "🌧 Rain") {
-        if (choice === "water") {
-            energy += 15;
-            log("Rain helped you collect water. +15 Energy");
-        } else {
-            energy -= 15;
-            log("Rain made things harder. -15 Energy");
-        }
-    }
-
-    else if (weather === "🌪 Storm") {
-        if (choice === "rest") {
-            energy += 10;
-            log("Smart move! You stayed safe during storm.");
-        } else {
-            health -= 20;
-            log("Storm hurt you! -20 Health");
-        }
-    }
-
-    else if (weather === "❄ Snow") {
-        if (choice === "fire") {
-            energy += 15;
-            log("Fire kept you warm. +15 Energy");
-        } else {
-            health -= 15;
-            log("Cold snow hurt you. -15 Health");
-        }
-    }
-
-    // Daily food use
-    if (food > 0) {
-        food -= 1;
-    } else {
-        health -= 10;
-        log("No food! -10 Health");
-    }
-
-    if (health <= 0) {
-        health = 0;
-        gameOver = true;
-        log("Game Over! You survived " + day + " days.");
-        update();
-        return;
-    }
-
-    day++;
-    nextWeather();
-    update();
-}
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
